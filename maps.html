@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>School Board Map by Williamson Strong</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="./leaflet.css" />
+
+<link rel="stylesheet" href="./leaflet.defaultextent.css" />
+   
+	<style>
+		#map {
+			width: 100%;
+			height: 500px;
+		}
+
+		.popup {
+			font: 14px/16px Arial, Helvetica, sans-serif;
+			text-align: center
+		}
+
+		.info {
+			padding: 6px 8px;
+			font: 14px/16px Arial, Helvetica, sans-serif;
+			background: white;
+			background: rgba(255,255,255,0.8);
+			box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			border-radius: 5px;
+			text-align: center
+
+		}
+		.info, .popup h4 {
+			margin: 0 0 5px;
+			color: #777;
+		}
+
+		.info, .popup h6 {
+			font: 13px/15px Arial, Helvetica, sans-serif;
+		}
+
+		.legend {
+			text-align: left;
+			line-height: 18px;
+			color: #555;
+		}
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 8px;
+			opacity: 0.7;
+		}
+
+		.picture {
+			border-radius: 50%; 
+			width: 94px; height: 94px; overflow: hidden;
+		}
+	</style>
+	 
+</head>
+<body>
+	<div id="map"></div>
+
+	<script src="./leaflet.js"></script>
+		<script src="./leaflet.defaultextent.js" ></script>
+
+	<script src="./leaflet-geodesy.js"></script>
+
+  	<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="./L.Control.Locate.css" />
+<!--[if lt IE 9]>
+    <link rel="stylesheet" href="./L.Control.Locate.ie.css"/>
+<![endif]-->
+
+	<script src="./L.Control.Locate.js" ></script>
+	
+	<script src="./Control.OSMGeocoder.js"></script>
+    <script src="./leaflet-pip.min.js"></script>
+
+
+	<script type="text/javascript" src="voteWilliamson.js"></script>
+	<script type="text/javascript" src="members.js"></script>
+	
+	<script type="text/javascript">
+
+		var map = L.map('map', {minZoom: 8}); //.setView([35.929064, -86.857402], 10);
+
+		L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+			maxZoom: 18,
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			id: 'examples.map-20v6611k'
+		}).addTo(map);
+
+
+		L.control.defaultExtent().addTo(map);
+	L.control.locate().addTo(map);
+	
+		function onLocationFound(e) {
+
+             	var latlng = e.latlng;
+            	var layer = leafletPip.pointInLayer(latlng, geojson);
+
+            	map.fitBounds(layer[0].getBounds());
+
+				var marker = L.marker(latlng).addTo(map);
+            	marker.bindPopup('<div class="popup"><h4>Current Location</h4>' + getSchoolDistrict(layer[0].feature.properties) + '</div>').openPopup();
+}
+
+map.on('locationfound', onLocationFound);
+		
+		// control that shows state info on hover
+		var info = L.control();
+
+		info.onAdd = function (map) {
+			this._div = L.DomUtil.create('div', 'info');
+			this.update();
+			return this._div;
+		};
+
+		info.update = function (props) {
+			this._div.innerHTML = props ? '<h4>WCS School Board</h4>' + getSchoolDistrict(props) + '<br /><h6>' + props.areaname + '<br />' + props.density + ' children/sq mi</h6>' : 'Hover over a district';
+		};
+
+		info.addTo(map);
+
+		function getSchoolDistrict(props) {
+			return (props ?
+				'<b>District ' + props.subdistrict + '</b><br /><img src="./images/' + props.schoolboard.image + '" class="picture" /><br />' + props.schoolboard.member
+				: "");
+		}
+
+		function getMemberData(props) {
+				return props ? memberData[props.name.substring(0, props.name.indexOf('-')) - 1] : {};
+		}
+
+		// get color depending on population density value
+		function getColor(d) {
+			return d > 1000 ? '#800026' :
+			       d > 500  ? '#BD0026' :
+			       d > 200  ? '#E31A1C' :
+			       d > 100  ? '#FC4E2A' :
+			       d > 50   ? '#FD8D3C' :
+			       d > 20   ? '#FEB24C' :
+			       d > 10   ? '#FED976' :
+			                  '#FFEDA0';
+		}
+
+		function style(feature) {
+			return {
+				weight: 2,
+				opacity: 1,
+				color: 'white',
+				dashArray: '3',
+				fillOpacity: 0.7,
+				fillColor: getColor(feature.properties.density)
+			};
+		}
+
+		function highlightFeature(e) {
+			var layer = e.target;
+
+			layer.setStyle({
+				weight: 5,
+				color: '#666',
+				dashArray: '',
+				fillOpacity: 0.7
+			});
+
+			if (!L.Browser.ie && !L.Browser.opera) {
+				layer.bringToFront();
+			}
+
+			info.update(layer.feature.properties);
+		}
+
+		var geojson;
+
+		function resetHighlight(e) {
+			geojson.resetStyle(e.target);
+			info.update();
+		}
+
+		function zoomToFeature(e) {
+			map.fitBounds(e.target.getBounds());
+		}
+
+		function onEachFeature(feature, layer) {
+			feature.properties.area = LGeo.area(layer) / 1000000 / 2.58999;
+			feature.properties.schoolboard = getMemberData(feature.properties);
+			feature.properties.subdistrict = feature.properties.name.substring(0, feature.properties.name.indexOf(' '));
+			feature.properties.areaname = feature.properties.name.substring(feature.properties.name.indexOf(' '), feature.properties.name.lastIndexOf(' '));
+
+			//<td>TOTALPOP</td>\r\r\n<td>3241</td>
+
+			var description = feature.properties.description;
+			description=description.substring(description.indexOf("<td>TOTALPOP</td>")+17);
+			description = description.substring(description.indexOf("<td>")+4)
+			feature.properties.population = description.substring(0, description.indexOf("</td>"));
+
+			//<td>TOTALPOP18</td>\r\r\n<td>2337</td>
+
+			description=description.substring(description.indexOf("<td>TOTALPOP18</td>")+17);
+			description = description.substring(description.indexOf("<td>")+4)
+			feature.properties.population18 = description.substring(0, description.indexOf("</td>"));
+
+			feature.properties.populationChild = feature.properties.population - feature.properties.population18;
+
+		   feature.properties.density = Math.round(feature.properties.populationChild / feature.properties.area) ;
+
+
+        	layer.on({
+				mouseover: highlightFeature,
+				mouseout: resetHighlight,
+				click: zoomToFeature
+			});
+
+		}
+
+		geojson = L.geoJson(districtData, {
+			onEachFeature: onEachFeature,
+			style: style
+		});
+
+		geojson.setStyle(style);
+
+		geojson.addTo(map);
+
+		map.fitBounds(geojson.getBounds());
+		map.setMaxBounds(geojson.getBounds());
+
+			var osmGeocoder = new L.Control.OSMGeocoder({
+            collapsed: false,
+            position: 'topleft',
+            text: 'Find Street',
+            bounds: geojson.getBounds(),
+            callback: function (results) {
+            	var lat = results[0].lat;
+            	var lon = results[0].lon;
+            	var latlng = new L.LatLng(lat,lon);
+            	var layer = leafletPip.pointInLayer(latlng, geojson);
+
+            	map.fitBounds(layer[0].getBounds());
+
+				var marker = L.marker(latlng).addTo(map);
+            	marker.bindPopup('<div class="popup"><h4>' + results[0].display_name + '</h4>' + getSchoolDistrict(layer[0].feature.properties) + '</div>').openPopup();
+
+           
+            	/*var popup = L.popup()
+    .setLatLng(latlng)
+    .setContent('<p>Hello world!<br />This is a nice popup.</p>')
+    .openOn(map);*/
+
+
+              //  map.fitBounds(bounds);
+  			}
+			});
+
+		map.addControl(osmGeocoder);
+
+
+		map.attributionControl.addAttribution('District data &copy; <a href="http://www.comptroller.tn.gov/lg/SubDistrictMaps.asp?c=Williamson&s=County%20Commission">TN Comptroller</a>');
+
+		map.attributionControl.addAttribution('Application &copy; <a href="http://williamsonstrong.org">Williamson Strong</a>');
+
+
+		var legend = L.control({position: 'bottomright'});
+
+		legend.onAdd = function (map) {
+
+			var div = L.DomUtil.create('div', 'info legend'),
+				grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+				labels = [],
+				from, to;
+
+			for (var i = 0; i < grades.length; i++) {
+				from = grades[i];
+				to = grades[i + 1];
+
+				labels.push(
+					'<i style="background:' + getColor(from + 1) + '"></i> ' +
+					from + (to ? '&ndash;' + to : '+'));
+			}
+
+			div.innerHTML = 'children/sq mi<br>' + labels.join('<br>');
+			return div;
+		};
+
+		legend.addTo(map);
+
+	</script>
+</body>
+</html>
