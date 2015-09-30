@@ -16,8 +16,8 @@ var memberData = [
   },
   {
     "name": "District 4",
-    "member": "Paul Bartholemew",
-    "image": "bartholemew.jpg"
+    "member": "Anne McGraw",
+    "image": "mcgraw.jpg"
   },
   {
     "name": "District 5",
