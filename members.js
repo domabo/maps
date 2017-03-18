@@ -1,8 +1,8 @@
 var memberData = [
   {
     "name": "District 1",
-    "member": "Ken Peterson",
-    "image": "peterson.jpg"
+    "member": "Angela Durham",
+    "image": "adurham.jpg"
   },
   {
     "name": "District 2",
@@ -11,8 +11,8 @@ var memberData = [
   },
   {
     "name": "District 3",
-    "member": "PJ Mezera (chair)",
-    "image": "mezera.jpg"
+    "member": "Eliot Mitchell",
+    "image": "mitchell.jpg"
   },
   {
     "name": "District 4",
@@ -31,8 +31,8 @@ var memberData = [
   },
   {
     "name": "District 7",
-    "member": "Bobby Hullett",
-    "image": "hullett.jpg"
+    "member": "To Be Announced",
+    "image": "wcs.png"
   },
   {
     "name": "District 8",
@@ -46,17 +46,17 @@ var memberData = [
   },
   {
     "name": "District 10",
-    "member": "Beth Burgos (vice-chair)",
+    "member": "Beth Burgos",
     "image": "burgos.jpg"
   },
   {
     "name": "District 11",
-    "member": "Mark Gregory",
-    "image": "gregory.jpg"
+    "member": "KC Haugh",
+    "image": "haugh.jpg"
   },
   {
     "name": "District 12",
-    "member": "Susan Curlee",
-    "image": "curlee.jpg"
+    "member": "Nancy Garrett",
+    "image": "garrett.png"
   }
 ]
