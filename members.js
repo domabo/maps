@@ -31,8 +31,8 @@ var memberData = [
   },
   {
     "name": "District 7",
-    "member": "To Be Announced",
-    "image": "wcs.png"
+    "member": "Sheila Cleveland",
+    "image": "Cleveland.png"
   },
   {
     "name": "District 8",
@@ -46,8 +46,8 @@ var memberData = [
   },
   {
     "name": "District 10",
-    "member": "Beth Burgos",
-    "image": "burgos.jpg"
+    "member": "Eric Welch",
+    "image": "Welch.png"
   },
   {
     "name": "District 11",
